@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101a2e" />
+    <meta name="description" content="Una invitación especial para Kass." />
+    <title>Una salida pendiente para Kass</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="experience" id="experience">
+      <div class="stars" aria-hidden="true"></div>
+      <div class="glow glow-one" aria-hidden="true"></div>
+      <div class="glow glow-two" aria-hidden="true"></div>
+
+      <section class="scene scene-invite is-active" id="inviteScene" aria-labelledby="inviteTitle">
+        <div class="intro-copy">
+          <p class="eyebrow">Una invitación de primavera</p>
+          <h1 id="inviteTitle">Kass, creo que tenemos una salida pendiente… ¿la hacemos realidad?</h1>
+          <p class="intro-note">Hay una pequeña sorpresa esperando por ti.</p>
+        </div>
+
+        <div class="bud bud-invite" aria-hidden="true">
+          <span class="bud-stem"></span>
+          <span class="bud-leaf bud-leaf-left"></span>
+          <span class="bud-leaf bud-leaf-right"></span>
+          <span class="bud-head"><i></i><i></i><i></i></span>
+        </div>
+
+        <div class="actions" aria-label="Respuesta a la invitación">
+          <button class="button button-primary" id="yesButton" type="button">Sí, acepto 🌻</button>
+          <button class="button button-quiet" id="thinkingButton" type="button">Necesito pensarlo</button>
+        </div>
+      </section>
+
+      <section class="scene scene-garden" id="gardenScene" aria-labelledby="gardenTitle" aria-hidden="true">
+        <div class="garden-copy">
+          <p class="eyebrow">Para ti, Kass</p>
+          <h2 id="gardenTitle">Sabía que aceptarías 🌻</h2>
+          <p class="garden-message">
+            Dicen que en primavera florecen las flores…<br />
+            pero yo prefiero que florezca una salida contigo.<br />
+            Estas flores amarillas son para ti, Kass.<br />
+            <strong>¿Cuándo estás libre?</strong>
+          </p>
+          <button class="button button-primary" id="planButton" type="button">Elegir fecha y hora</button>
+        </div>
+
+        <div class="garden" aria-label="Jardín nocturno con flores amarillas">
+          <div class="moon"></div>
+          <div class="hill hill-back"></div>
+          <div class="hill hill-front"></div>
+          <div class="flower flower-one"><span class="flower-head"></span><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span></div>
+          <div class="flower flower-two"><span class="flower-head"></span><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span></div>
+          <div class="flower flower-three"><span class="flower-head"></span><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span></div>
+          <div class="flower flower-four"><span class="flower-head"></span><span class="stem"></span><span class="leaf leaf-left"></span><span class="leaf leaf-right"></span></div>
+          <div class="firefly firefly-one"></div>
+          <div class="firefly firefly-two"></div>
+          <div class="firefly firefly-three"></div>
+          <div class="firefly firefly-four"></div>
+        </div>
+      </section>
+
+      <section class="scene scene-planner" id="plannerScene" aria-labelledby="plannerTitle" aria-hidden="true">
+        <div class="planner-card">
+          <div class="planner-heading">
+            <p class="eyebrow">Nuestra salida pendiente</p>
+            <h2 id="plannerTitle">Elijamos un día bonito</h2>
+            <p>Escoge una fecha futura, una hora y lo que se te antoja.</p>
+          </div>
+
+          <form id="dateForm" novalidate>
+            <div class="field-grid">
+              <label class="field">
+                <span>Fecha</span>
+                <input id="dateInput" name="date" type="date" required />
+                <small id="dateHint">Elige un día después de hoy.</small>
+              </label>
+              <label class="field">
+                <span>Hora</span>
+                <select id="timeInput" name="time" required>
+                  <option value="">Selecciona una hora</option>
+                </select>
+              </label>
+            </div>
+
+            <fieldset class="food-field">
+              <legend>¿Qué se te antoja para nuestra salida?</legend>
+              <div class="food-options" id="foodOptions">
+                <button type="button" class="food-option" data-food="Picantería">Picantería</button>
+                <button type="button" class="food-option" data-food="Pizza">Pizza</button>
+                <button type="button" class="food-option" data-food="Parrillas">Parrillas</button>
+                <button type="button" class="food-option" data-food="Makis">Makis</button>
+                <button type="button" class="food-option" data-food="Salchipapa">Salchipapa</button>
+                <button type="button" class="food-option" data-food="Pollo a la brasa">Pollo a la brasa</button>
+              </div>
+            </fieldset>
+
+            <p class="form-error" id="formError" role="alert"></p>
+            <button class="button button-primary button-submit" type="submit">Confirmar salida 🌻</button>
+          </form>
+
+          <div class="confirmation" id="confirmation" hidden>
+            <div class="confirmation-icon" aria-hidden="true">✦</div>
+            <p class="eyebrow">Esta es nuestra salida pendiente</p>
+            <h3>Avísame si esa fecha te parece bien 💛</h3>
+            <dl class="summary" id="summary"></dl>
+            <a class="button button-whatsapp" id="whatsappButton" href="#" target="_blank" rel="noopener">Avisarle a Jesus por WhatsApp</a>
+            <button class="button button-epilogue" id="epilogueButton" type="button">Ver una última sorpresa 🌻</button>
+            <button class="text-button" id="editButton" type="button">Cambiar selección</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="scene scene-epilogue" id="epilogueScene" aria-labelledby="epilogueTitle" aria-hidden="true">
+        <div class="epilogue-copy" id="epilogueIntro">
+          <p class="eyebrow">Una última sorpresa</p>
+          <h2 id="epilogueTitle">Estas flores también son para ti, Kass</h2>
+          <p>No quería terminar sin dejarte un ramo que pudieras descubrir poquito a poquito.</p>
+          <button class="button button-primary" id="revealBouquetButton" type="button">Revelar el ramo</button>
+        </div>
+
+        <div class="epilogue-stage" id="epilogueStage" hidden>
+          <div class="bouquet-reveal" id="bouquetReveal" aria-label="Ramo interactivo de flores amarillas">
+            <img class="bouquet-layer bouquet-base" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/00_base_ramo.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/01_flores.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/02_flores.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/03_flores.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/04_flores.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/05_flores.png" alt="" />
+            <img class="bouquet-layer" src="https://raw.githubusercontent.com/Jacob958438/flores-amarillas-2026/main/assets/images/ramo-fijo/06_flores.png" alt="" />
+            <div class="bouquet-hotspots" id="bouquetHotspots"></div>
+          </div>
+          <p class="bouquet-hint" id="bouquetHint">Toca las flores que tengan una sorpresa para ti.</p>
+          <p class="bouquet-progress" id="bouquetProgress" aria-live="polite">0 de 3 flores descubiertas</p>
+          <button class="music-toggle" id="musicToggle" type="button" hidden>Pausar música</button>
+          <div class="epilogue-final" id="epilogueFinal" hidden>
+            <p>Ahora sí, Kass: flores, una salida pendiente y muchas ganas de compartir un día bonito contigo.</p>
+            <strong>Con cariño, Jesus 💛</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="petal-layer" id="petalLayer" aria-hidden="true"></div>
+    <audio id="epilogueMusic" loop preload="auto">
+      <source src="assets/flores-amarillas.mp3" type="audio/mpeg" />
+    </audio>
+    <div class="reaction-modal" id="reactionModal" role="dialog" aria-modal="true" aria-labelledby="reactionTitle" aria-hidden="true">
+      <div class="reaction-card">
+        <button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button>
+        <p class="reaction-title" id="reactionTitle">HUHUHUHU 😭</p>
+        <div class="reaction-art" aria-hidden="true">
+          <span class="reaction-face">🥺</span>
+          <img class="reaction-image" id="reactionImage" alt="Gatito triste" />
+          <span class="reaction-petal reaction-petal-one">🌻</span>
+          <span class="reaction-petal reaction-petal-two">💧</span>
+          <span class="reaction-petal reaction-petal-three">💛</span>
+        </div>
+        <p class="reaction-copy">Todavía puedes aceptar esta salida pendiente.</p>
+        <div class="reaction-actions">
+          <button class="button button-primary" id="modalYes" type="button">Sí, acepto 🌻</button>
+          <button class="button button-modal-quiet" id="modalThinking" type="button">Necesito pensarlo</button>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

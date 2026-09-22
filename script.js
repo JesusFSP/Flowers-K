@@ -47,6 +47,8 @@ const reactionFace = document.querySelector('.reaction-face');
 const reactionThinking = document.querySelector('#modalThinking');
 const epilogueMusic = document.querySelector('#epilogueMusic');
 const musicToggle = document.querySelector('#musicToggle');
+const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+let musicContext = null;
 const selected = { food: '' };
 const bouquetLayers = [...document.querySelectorAll('.bouquet-layer:not(.bouquet-base)')];
 const bouquetHotspots = [
@@ -76,7 +78,12 @@ const epilogueMessages = [
 ];
 let discoveredFlowers = 0;
 let musicStarted = false;
-let musicPrimed = false;
+let musicPlaying = false;
+let musicBuffer = null;
+let musicSource = null;
+let musicPosition = 0;
+let musicStartedAt = 0;
+let musicDataPromise = null;
 
 function showScene(id) {
   sceneIds.forEach((sceneId) => {
@@ -176,7 +183,7 @@ function openFlowerMessage(index) {
   image.classList.add('is-hidden');
   face.hidden = false;
   document.querySelector('.reaction-copy').textContent = epilogueMessages[index];
-  startEpilogueMusic();
+  startEpilogueMusic(false);
   modal.classList.add('flower-message-modal');
   modal.classList.add('is-visible');
   modal.setAttribute('aria-hidden', 'false');
@@ -185,15 +192,65 @@ function openFlowerMessage(index) {
   document.querySelector('#modalThinking').focus();
 }
 
-function startEpilogueMusic() {
+function startBufferMusic(offset = 0) {
+  if (!musicContext || !musicBuffer) return false;
+  if (musicSource) {
+    try { musicSource.stop(); } catch (error) { /* Ya estaba detenido. */ }
+  }
+  musicSource = musicContext.createBufferSource();
+  musicSource.buffer = musicBuffer;
+  musicSource.loop = true;
+  musicSource.connect(musicContext.destination);
+  const safeOffset = offset % musicBuffer.duration;
+  musicContext.resume();
+  musicSource.start(0, safeOffset);
+  musicStartedAt = musicContext.currentTime;
+  musicPosition = safeOffset;
+  musicPlaying = true;
+  return true;
+}
+
+function pauseBufferMusic() {
+  if (!musicContext || !musicSource || !musicPlaying) return;
+  musicPosition = (musicPosition + musicContext.currentTime - musicStartedAt) % musicBuffer.duration;
+  try { musicSource.stop(); } catch (error) { /* Ya estaba detenido. */ }
+  musicPlaying = false;
+}
+
+function startEpilogueMusic(reset = false) {
   musicStarted = true;
   musicToggle.hidden = false;
-  if (musicPrimed) {
-    epilogueMusic.currentTime = 0;
-    epilogueMusic.muted = false;
-  } else {
-    epilogueMusic.muted = false;
+
+  // El contexto solo puede crearse/reanudarse dentro de un gesto del usuario.
+  if (!musicContext && AudioContextClass) musicContext = new AudioContextClass();
+  if (musicContext) musicContext.resume();
+
+  if (musicBuffer) {
+    if (musicPlaying && !reset) return;
+    startBufferMusic(reset ? 0 : musicPosition);
+    musicToggle.textContent = 'Pausar música';
+    return;
   }
+
+  if (musicDataPromise && musicContext) {
+    musicToggle.textContent = 'Preparando música...';
+    musicDataPromise
+      .then((audioData) => musicContext.decodeAudioData(audioData.slice(0)))
+      .then((buffer) => {
+        musicBuffer = buffer;
+        startBufferMusic(reset ? 0 : musicPosition);
+        musicToggle.textContent = 'Pausar música';
+      })
+      .catch(() => {
+        epilogueMusic.muted = false;
+        epilogueMusic.play();
+        musicToggle.textContent = 'Pausar música';
+      });
+    return;
+  }
+
+  epilogueMusic.muted = false;
+  if (reset) epilogueMusic.currentTime = 0;
   epilogueMusic.play().then(() => {
     musicToggle.textContent = 'Pausar música';
   }).catch(() => {
@@ -201,13 +258,15 @@ function startEpilogueMusic() {
   });
 }
 
-function primeEpilogueMusic() {
-  epilogueMusic.muted = true;
-  epilogueMusic.play().then(() => {
-    musicPrimed = true;
-  }).catch(() => {
-    // Algunos navegadores bloquean incluso el audio silenciado hasta el primer toque.
-  });
+function preloadEpilogueMusic() {
+  // fetch() no funciona con file:// por la política CORS del navegador.
+  if (!AudioContextClass || window.location.protocol === 'file:') return;
+  musicDataPromise = fetch('assets/flores-amarillas.mp3')
+    .then((response) => {
+      if (!response.ok) throw new Error('No se pudo cargar el audio local.');
+      return response.arrayBuffer();
+    })
+    .catch(() => null);
 }
 
 function closeFlowerMessage() {
@@ -334,14 +393,19 @@ form.addEventListener('submit', (event) => {
 
 document.querySelector('#epilogueButton').addEventListener('click', () => {
   showScene('epilogueScene');
-  startEpilogueMusic();
+  startEpilogueMusic(true);
 });
 
 document.querySelector('#revealBouquetButton').addEventListener('click', revealBouquet);
 
 musicToggle.addEventListener('click', () => {
-  if (!musicStarted) {
-    startEpilogueMusic();
+  if (musicBuffer) {
+    if (musicPlaying) {
+      pauseBufferMusic();
+      musicToggle.textContent = 'Reproducir música';
+    } else {
+      startEpilogueMusic(false);
+    }
     return;
   }
   if (epilogueMusic.paused) {
@@ -364,4 +428,4 @@ document.querySelector('#modalThinking').addEventListener('click', () => {
 
 setupPlanner();
 epilogueMusic.load();
-primeEpilogueMusic();
+preloadEpilogueMusic();

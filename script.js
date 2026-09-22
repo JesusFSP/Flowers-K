@@ -45,7 +45,6 @@ const reactionTitle = document.querySelector('#reactionTitle');
 const reactionImage = document.querySelector('#reactionImage');
 const reactionFace = document.querySelector('.reaction-face');
 const reactionThinking = document.querySelector('#modalThinking');
-const epilogueMusic = document.querySelector('#epilogueMusic');
 const musicToggle = document.querySelector('#musicToggle');
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 let musicContext = null;
@@ -83,7 +82,7 @@ let musicBuffer = null;
 let musicSource = null;
 let musicPosition = 0;
 let musicStartedAt = 0;
-let musicDataPromise = null;
+let musicReadyPromise = null;
 
 function showScene(id) {
   sceneIds.forEach((sceneId) => {
@@ -232,41 +231,45 @@ function startEpilogueMusic(reset = false) {
     return;
   }
 
-  if (musicDataPromise && musicContext) {
+  if (musicReadyPromise && musicContext) {
     musicToggle.textContent = 'Preparando música...';
-    musicDataPromise
-      .then((audioData) => musicContext.decodeAudioData(audioData.slice(0)))
+    musicReadyPromise
       .then((buffer) => {
-        musicBuffer = buffer;
-        startBufferMusic(reset ? 0 : musicPosition);
+        if (buffer) startBufferMusic(reset ? 0 : musicPosition);
         musicToggle.textContent = 'Pausar música';
       })
-      .catch(() => {
-        epilogueMusic.muted = false;
-        epilogueMusic.play();
-        musicToggle.textContent = 'Pausar música';
-      });
     return;
   }
 
-  epilogueMusic.muted = false;
-  if (reset) epilogueMusic.currentTime = 0;
-  epilogueMusic.play().then(() => {
-    musicToggle.textContent = 'Pausar música';
-  }).catch(() => {
-    musicToggle.textContent = 'Reproducir música';
+  musicToggle.textContent = 'Preparando música...';
+  prepareEpilogueMusic().then((buffer) => {
+    if (buffer) {
+      startBufferMusic(reset ? 0 : musicPosition);
+      musicToggle.textContent = 'Pausar música';
+    } else {
+      musicToggle.textContent = 'Música no disponible';
+    }
   });
 }
 
-function preloadEpilogueMusic() {
-  // fetch() no funciona con file:// por la política CORS del navegador.
-  if (!AudioContextClass || window.location.protocol === 'file:') return;
-  musicDataPromise = fetch('assets/flores-amarillas.mp3')
+function prepareEpilogueMusic() {
+  if (!AudioContextClass || window.location.protocol === 'file:') return Promise.resolve(null);
+  if (musicBuffer) return Promise.resolve(musicBuffer);
+  if (musicReadyPromise) return musicReadyPromise;
+  if (!musicContext) musicContext = new AudioContextClass();
+  musicContext.resume();
+  musicReadyPromise = fetch('assets/flores-amarillas-corto-trimmed.mp3')
     .then((response) => {
       if (!response.ok) throw new Error('No se pudo cargar el audio local.');
       return response.arrayBuffer();
     })
+    .then((audioData) => musicContext.decodeAudioData(audioData))
+    .then((buffer) => {
+      musicBuffer = buffer;
+      return buffer;
+    })
     .catch(() => null);
+  return musicReadyPromise;
 }
 
 function closeFlowerMessage() {
@@ -324,6 +327,7 @@ function acceptInvitation(event) {
   const button = event.currentTarget;
   button.textContent = '¡Sabía que aceptarías! 🌻';
   button.disabled = true;
+  prepareEpilogueMusic();
   reactionModal.classList.remove('is-visible');
   reactionModal.setAttribute('aria-hidden', 'true');
   addPetals();
@@ -408,13 +412,7 @@ musicToggle.addEventListener('click', () => {
     }
     return;
   }
-  if (epilogueMusic.paused) {
-    epilogueMusic.play();
-    musicToggle.textContent = 'Pausar música';
-  } else {
-    epilogueMusic.pause();
-    musicToggle.textContent = 'Reproducir música';
-  }
+  startEpilogueMusic(false);
 });
 
 document.querySelector('#editButton').addEventListener('click', () => {
@@ -427,5 +425,3 @@ document.querySelector('#modalThinking').addEventListener('click', () => {
 });
 
 setupPlanner();
-epilogueMusic.load();
-preloadEpilogueMusic();
